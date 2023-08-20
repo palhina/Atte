@@ -1,0 +1,32 @@
+.atte__content {
+    width: 90%;
+    margin: 30px auto;
+}
+
+.atte__date-title {
+    text-align: center;
+}
+
+.atte__customer {
+    margin: 30px auto;
+    width: 100%;
+}
+
+.customer-table__inner {
+    width: 100%;
+    border-collapse: collapse;
+    border-top: 1px solid #909090;
+    border-bottom: 1px solid #909090;
+}
+
+.customer-table__header-span,
+.update-form__item {
+    text-align: center;
+    border-bottom: 1px solid #909090;
+    height: 50px;
+
+}
+
+.update-form__item {
+    border-spacing: 0;
+}

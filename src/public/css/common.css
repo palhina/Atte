@@ -1,0 +1,46 @@
+.header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-ttl {
+    font-size: large;
+}
+
+.header-nav-list {
+    display: flex;
+    justify-content: space-between;
+}
+
+.header-nav-item {
+    list-style: none;
+    font-size: 100%;
+    margin: 0 30px;
+}
+
+a {
+    text-decoration: none;
+    color: #000000;
+}
+
+.header-nav__button{
+    border: none;
+    outline: none;
+    cursor: pointer;
+    background-color: #fff;
+}
+
+main {
+    background-color: #F2F2F2;
+    padding: 50px;
+}
+
+.footer {
+    text-align: center;
+}
+
+.copyright {
+    margin: 20px;
+}

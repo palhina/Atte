@@ -1,0 +1,38 @@
+.index__content {
+    width: 90%;
+    margin: 30px auto;
+}
+
+.index-title {
+    text-align: center;
+}
+
+.index__button-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    justify-content: center;
+    align-items: center;
+    height: 50vh;
+    margin: 5%;
+}
+
+.index__button-container button {
+    border: none;
+    outline: none;
+    padding: 15% 30%;
+    background-color: #fff;
+    border-radius: 5px;
+    font-size: 20px;
+}
+
+.index__button-start {
+    color: #000000;
+    cursor: pointer;
+}
+
+.index__button-end,
+.index__button-rest,
+.index__button-continue {
+    color: #E5E5E5;
+}
