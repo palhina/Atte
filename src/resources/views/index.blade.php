@@ -7,13 +7,16 @@
 @section('content')
     <div class="index__content">
         <div class="index-title">
-            <h2>{{}}さんお疲れ様です！</h2>
+            <h2>『※名前を呼び出す』さんお疲れ様です！</h2>
         </div>
         <div class="index__button-container">
-            <button class="index__button-start">勤務開始</button>
-            <button class="index__button-end">勤務終了</button>
-            <button class="index__button-rest">休憩開始</button>
-            <button class="index__button-continue">休憩終了</button>  
+            <form class="timestamp" action="/timein" method="post">
+            @csrf
+                <button class="index__button-punchIn">勤務開始</button>
+            </form>
+            <button class="index__button-punchOut" disabled>勤務終了</button>
+            <button class="index__button-breakIn" disabled>休憩開始</button>
+            <button class="index__button-breakOut" disabled>休憩終了</button>  
         </div>
     </div>
 @endsection

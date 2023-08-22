@@ -24,15 +24,16 @@
     background-color: #fff;
     border-radius: 5px;
     font-size: 20px;
+    width: -webkit-fill-available;
 }
 
-.index__button-end,
-.index__button-rest {
+.index__button-punchOut,
+.index__button-breakIn {
     color: #000000;
     cursor: pointer;
 }
 
-.index__button-start,
-.index__button-continue {
+.index__button-punchIn,
+.index__button-breakOut {
     color: #E5E5E5;
 }

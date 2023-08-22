@@ -10,10 +10,16 @@
             <h2>『※名前を呼び出す』さんお疲れ様です！</h2>
         </div>
         <div class="index__button-container">
-            <button class="index__button-start">勤務開始</button>
-            <button class="index__button-end">勤務終了</button>
-            <button class="index__button-rest">休憩開始</button>
-            <button class="index__button-continue">休憩終了</button>  
+            <button class="index__button-punchIn" disabled>勤務開始</button>
+            <form class="timestamp" action="/timeout" method="post">
+            @csrf
+                <button class="index__button-punchOut">勤務終了</button>
+            </form>
+            <form class="timestamp" action="/breakin" method="post">
+            @csrf
+                <button class="index__button-breakIn">休憩開始</button>
+            </form>
+            <button class="index__button-breakOut" disabled>休憩終了</button>    
         </div>
     </div>
 @endsection

@@ -24,6 +24,12 @@ Route::middleware('auth')->group(function () {
 Route::get('/', [AttendanceController::class,'index']);
 // dateページ表示
 Route::get('/attendance', [AttendanceController::class,'confirm']);
-
-// 他end、rest、continueとかもここに入れとく
+// 勤務開始ボタン選択後処理
+Route::post('/timein', [AttendanceController::class,'punchIn']);
+// 勤務終了ボタン選択時処理
+Route::post('/timeout', [AttendanceController::class,'punchOut']);
+// 休憩開始ボタン選択
+Route::post('/breakin', [AttendanceController::class,'breakIn']);
+// 休憩終了ボタン
+Route::post('/breakout', [AttendanceController::class,'breakOut']);
 });

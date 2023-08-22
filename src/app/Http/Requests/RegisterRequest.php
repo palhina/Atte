@@ -24,10 +24,7 @@ class RegisterRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => ['required','string','max:191'],
-            'email' =>  ['required','string','email','max:191'],
-            // 登録済みユーザーの重複防止処置を追加すること！！（Userテーブル作成後）
-            'password' => ['required','min:8','max:191']
+         //
         ];
     }
 }
