@@ -20,8 +20,13 @@ Route::get('/register', [RegisteredUserController::class,'create']);
 
 // 以下ログイン時のみ有効な動作
 Route::middleware('auth')->group(function () {
+Route::get('/home', [AttendanceController::class, 'home'])->name('home');
 // 打刻ページ表示
-Route::get('/', [AttendanceController::class,'index']);
+Route::get('/', [AttendanceController::class,'index'])->name('index');
+// 打刻ページ（勤務開始後）表示
+Route::get('/started', [AttendanceController::class,'started'])->name('started');
+// 打刻ページ（休憩開始後）表示
+Route::get('/break', [AttendanceController::class,'break'])->name('break');
 // dateページ表示
 Route::get('/attendance', [AttendanceController::class,'confirm']);
 // 勤務開始ボタン選択後処理
@@ -29,7 +34,9 @@ Route::post('/timein', [AttendanceController::class,'punchIn']);
 // 勤務終了ボタン選択時処理
 Route::post('/timeout', [AttendanceController::class,'punchOut']);
 // 休憩開始ボタン選択
-Route::post('/breakin', [AttendanceController::class,'breakIn']);
+Route::post('/breakin/{attendance}', [AttendanceController::class,'breakIn']);
 // 休憩終了ボタン
 Route::post('/breakout', [AttendanceController::class,'breakOut']);
 });
+
+

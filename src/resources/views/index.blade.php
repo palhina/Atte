@@ -7,7 +7,7 @@
 @section('content')
     <div class="index__content">
         <div class="index-title">
-            <h2>『※名前を呼び出す』さんお疲れ様です！</h2>
+            <h2>{{ $user->name }}さんお疲れ様です！</h2>
         </div>
         <div class="index__button-container">
             <form class="timestamp" action="/timein" method="post">

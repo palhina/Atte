@@ -15,10 +15,12 @@ class CreateBreaktimesTable extends Migration
     {
         Schema::create('breaktimes', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->timestamp('breakIn_time')->nullable();
-            $table->timestamp('breakOut_time')->nullable();
+            $table->unsignedBigInteger('attendance_id');
+            $table->timestamp('breakin_time')->nullable();
+            $table->timestamp('breakout_time')->nullable();
             $table->timestamps();
+            
+            $table->foreign('attendance_id')->references('id')->on('attendances');
         });
     }
 

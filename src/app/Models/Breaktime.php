@@ -8,14 +8,18 @@ use Illuminate\Database\Eloquent\Model;
 class Breaktime extends Model
 {
     use HasFactory;
+    protected $guarded = array('id');
+    public static $rules = array(
+        'attendance_id' => 'required',
+    );
     protected $fillable = [
-        'user_id', 
-        'breakIn_time', 
-        'breakOut_time'
+        'attendance_id',
+        'breakin_time', 
+        'breakout_time'
     ];
-
-     public function user()
+    
+     public function attendance()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Attendance::class, 'attendance_id');
     }
 }
