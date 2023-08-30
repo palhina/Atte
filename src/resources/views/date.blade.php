@@ -21,18 +21,17 @@
                         <th class="customer-table__header-span">勤務時間</th>
                     </div>
                 </tr>
-                <!-- アットforeach挿入 -->
+                @foreach ($attendances as $attendance)
                 <tr class="customer-table__row">
                     <div class="customer-table__item">
                         <td class="update-form__item">
-                            テスト太郎
-                            <!--  配列やじるしnameに書き換え、以下4つ同様 -->
+                            {{$attendance->user->name}}
                         </td>
                         <td class="update-form__item">
-                            10:00:00
+                            {{\Carbon\Carbon::parse($attendance->start_time)->format('H:i:s')}}
                         </td>
                         <td class="update-form__item">
-                            20:00:00
+                            {{\Carbon\Carbon::parse($attendance->end_time)->format('H:i:s')}}
                         </td>
                         <td class="update-form__item">
                             00:30:00
@@ -42,6 +41,7 @@
                         </td>
                     </div>
                 </tr>
+                @endforeach
             <div class="pagination">
                 <!-- ぺジネーション挿入 -->
             </div>

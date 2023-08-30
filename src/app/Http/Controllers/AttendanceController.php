@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\RegisterRequest;
 use App\Models\Attendance;
 use App\Models\Breaktime;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -13,7 +14,7 @@ class AttendanceController extends Controller
 {
     public function index()
     {
-        $user = auth()->user(); 
+        $user = auth()->user(); 			
         return view('index', compact('user'));
     }
     public function started()
@@ -25,63 +26,65 @@ class AttendanceController extends Controller
         $user = auth()->user(); 
         return view('break', compact('user'));
     }
-     public function home()
-    {
-                $user = Auth::user();
-        if ($user)
-         {
-        $data = Attendance::where('user_id', $user->id)->first();
-        } // テーブルからデータを取得
-        if ($data && $data->start_time !== null) {
-            return redirect()->route('started');
-        } else {
-            return redirect()->route('index');
-        }
-    }
 
     public function punchIn()
     {   
         $user = Auth::user();
+
+        // 現在の年月日を整数で抽出（日付別勤怠ページへの前処理）
+        $today = Carbon::today();
+        $month = intval($today->month);
+        $day = intval($today->day);
+        $year = intval($today->year);
+
         $attendance = Attendance::create([
             'user_id' => $user->id,
-            'start_time' => now(),
+            'start_time' => Carbon::now(),
+            'month' => $month,
+            'day' => $day,
+            'year' => $year,
         ]);
         return view('started',compact('user'));
+
     }
     public function punchOut()
     {
-        $user = auth()->user();
-        $userId = Auth::id();
-        $attendance = Attendance::where('user_id',$userId)->latest()->first();
+        $user = Auth::user();
+        $attendance = Attendance::where('user_id',$user->id)->latest()->first();
+        // 多分ここに、日付が本日と違った場合(24時を回ったら)みたいな処理が入ると思われる
         $attendance->update([
-            'end_time' => now(),
+            'end_time' => Carbon::now(),
         ]);
         return view('index',compact('user'));
     }
     public function breakIn()
     {
         $user = Auth::user();
-        $attendance = Attendance::first();
-        $breaktime = Breaktime::create([
-            'attendance_id' => $attendance->id,
-            'breakin_time' => now(),
-        ]);
-        return view('break',compact('user'));
+        if ($user) {
+            $attendanceId = $user->attendance->id;
+            $breaktime = Breaktime::create([
+                'attendance_id' => $attendanceId,
+                'breakin_time' => Carbon::now(),
+            ]);
+            return view('break',compact('user'));
+        }
     }
     public function breakOut()
     {
         $user = auth()->user();
-         // attendanced_idを紐づける
-        $breaktime = Breaktime::where('user_id',$userId)->latest()->first();
+        $attendance = $user->attendance;
+        $breaktime = Breaktime::where('attendance_id',$attendance->id)->latest()->first();
         $breaktime->update([
-            'breakout_time' => now(),
+            'breakout_time' => Carbon::now(),
         ]);
-        return view('index',compact('user'));
+        return view('started',compact('user'));
     }
 
     // 日付別勤怠管理ページへアクセス
         public function confirm()
     {
-        return view('date');
+        $user = Auth::user();
+        $attendances = Attendance::with('user')->get();
+        return view('date', compact('user', 'attendances'));
     }
 }

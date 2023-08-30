@@ -11,7 +11,10 @@ class Attendance extends Model
     protected $fillable = [
         'user_id', 
         'start_time', 
-        'end_time'
+        'end_time',
+        'year',
+        'month',
+        'day',
     ];
 
      public function user()

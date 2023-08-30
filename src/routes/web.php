@@ -27,8 +27,6 @@ Route::get('/', [AttendanceController::class,'index'])->name('index');
 Route::get('/started', [AttendanceController::class,'started'])->name('started');
 // 打刻ページ（休憩開始後）表示
 Route::get('/break', [AttendanceController::class,'break'])->name('break');
-// dateページ表示
-Route::get('/attendance', [AttendanceController::class,'confirm']);
 // 勤務開始ボタン選択後処理
 Route::post('/timein', [AttendanceController::class,'punchIn']);
 // 勤務終了ボタン選択時処理
@@ -37,6 +35,8 @@ Route::post('/timeout', [AttendanceController::class,'punchOut']);
 Route::post('/breakin/{attendance}', [AttendanceController::class,'breakIn']);
 // 休憩終了ボタン
 Route::post('/breakout', [AttendanceController::class,'breakOut']);
+// dateページ表示
+Route::get('/attendance', [AttendanceController::class,'confirm']);
 });
 
 
