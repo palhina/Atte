@@ -42,9 +42,9 @@
                     </div>
                 </tr>
                 @endforeach
-            <div class="pagination">
-                <!-- ぺジネーション挿入 -->
-            </div>
-        </table>
+            </table>
+        <div class="pagination">
+            {{$attendances->links('vendor.pagination.custom')}}
+        </div>
     </div>
 @endsection

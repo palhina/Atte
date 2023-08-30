@@ -84,7 +84,7 @@ class AttendanceController extends Controller
         public function confirm()
     {
         $user = Auth::user();
-        $attendances = Attendance::with('user')->get();
+        $attendances = Attendance::with('user')->paginate(5);
         return view('date', compact('user', 'attendances'));
     }
 }
