@@ -14,8 +14,29 @@ class AttendanceController extends Controller
 {
     public function index()
     {
-        $user = auth()->user(); 			
-        return view('index', compact('user'));
+        $user = auth::user(); 	
+        //以下追加処理…同日に２回出勤が押せない処理：リダイレクト先設定いじってstartedページへ飛ばすようにする
+        // ログイン者の一番最新の出勤履歴を取得しoldPunchIn変数に格納
+        $oldPunchIn = Attendance::where('user_id',$user->id)->latest()->first();
+        // 以下、1日の出勤を1回にする処理
+        //１．前回の出勤日はいつだったか？ 
+        $oldday = '';
+        //もしユーザーが以前に出勤していた際(oldPunchInが存在していた場合)の処理 
+        if ($oldPunchIn) 
+        {
+            //oldPunchInの出勤時刻(start_time)をCarbonに変換、oldTimeIn変数に格納 
+            $oldTimeIn = new Carbon($oldPunchIn->start_time);
+            // 上記で格納したoldTimeInの日付情報を取得、時刻を０時０分０秒にしてoldDay変数へ格納
+            $oldDay = $oldTimeIn->startOfDay();
+        }
+        // ２．今日の日付取得
+        $today = Carbon::today();
+        // １と２が同じ時（同日に出勤しようとしている場合）は、出勤ボタンが押された後（started.blade.php）へリダイレクトする
+       if ($oldDay->isSameDay($today)){
+            return redirect('/started')->with(compact('user'));
+       }else{
+            return view('index', compact('user'));
+        }
     }
     public function started()
     {
