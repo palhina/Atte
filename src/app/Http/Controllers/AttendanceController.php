@@ -85,6 +85,23 @@ class AttendanceController extends Controller
     {
         $user = Auth::user();
         $attendances = Attendance::with('user')->paginate(5);
-        return view('date', compact('user', 'attendances'));
+        // 現在の年月日を取得し表示する  
+        $today = Carbon::today();	
+        $month = intval($today->month);	
+        $day = intval($today->day);	
+        $format = $today->format('Y-m-d');	
+        //当日の勤怠を取得	
+        $items = Attendance::GetMonthAttendance($month)->GetDayAttendance($day)->get();	
+        return view('date', compact('user', 'attendances', 'items', 'day', 'format'));
+    }
+    public function daily(Request $request) 
+    {
+        $items = Attendance::
+            where('year',$request->year)
+            ->where('month',$request->month)
+            ->where('day',$request->day)
+            ->get();
+        return redirect('/attendance')->with('items', $items);
     }
 }
+

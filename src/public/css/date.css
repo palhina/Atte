@@ -3,8 +3,24 @@
     margin: 30px auto;
 }
 
-.atte__date-title {
-    text-align: center;
+.atte__date {
+    display: flex;
+    justify-content: center;
+}
+
+.atte__date-search{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.prev-date-button,
+.next-date-button{
+    margin: 20px;
+    color: #007bff;
+    font-weight: bolder;
+    background-color: #FFFFFF;
+    border: 1px solid #007bff;
 }
 
 .atte__customer {

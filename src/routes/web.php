@@ -37,6 +37,8 @@ Route::post('/breakin/{attendance}', [AttendanceController::class,'breakIn']);
 Route::post('/breakout', [AttendanceController::class,'breakOut']);
 // dateページ表示
 Route::get('/attendance', [AttendanceController::class,'confirm']);
+// 日付別勤怠検索
+Route::post('/attendance', [AttendanceController::class,'daily']);
 });
 
 

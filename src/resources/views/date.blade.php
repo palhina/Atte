@@ -1,4 +1,4 @@
-<@extends('layouts.app')
+@extends('layouts.app')
 
 @section('css')
     <link rel="stylesheet" href="{{ asset('css/date.css') }}">
@@ -6,10 +6,35 @@
 
 @section('content')
     <div class="atte__content">
-        <!-- formタグで日付からの検索機能を作成 -->
-        <div class="atte__date-title">
-            <h2>日付を入力</h2>
-        </div> 
+        <div class="atte__date-container">
+            <form action="/attendance" method="post">
+            @csrf
+                <div class ="atte__date">
+                    <button type="button" class="prev-date-button">&lt;</button>
+                    <div class ="atte__date-search">
+                        <select name="year" class="year">
+                            @for($i=2015; $i <= 2030; $i++)
+                            <option value="{{$i}}" {{ $i == 2021 ? 'selected' : '' }}>{{$i}}</option>
+                            @endfor
+                        </select>
+                        <p class="date-select">-</p>
+                        <select name="month" class="month">
+                            @for($i=1; $i <= 12; $i++)
+                            <option value="{{$i}}" {{ $i == 11 ? 'selected' : '' }}>{{$i}}</option>
+                            @endfor
+                        </select>
+                        <p class="date-select">-</p>
+                        <select name="day" class="day">
+                            @for($i=01; $i <= 31; $i++)
+                            <option value="{{$i}}" {{ $i == 01 ? 'selected' : '' }}>{{$i}}</option>
+                            @endfor
+                        </select>
+                    </div>
+                    <button type="button" class="next-date-button">&gt;</button>
+                    <button type="submit" class="submit-button" value="選択">選択</button>
+                </div>
+            </form>
+        </div>
         <div class="atte__customer">
             <table class="customer-table__inner">
                 <tr class="customer-table__row">
