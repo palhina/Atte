@@ -3,15 +3,19 @@
     margin: 30px auto;
 }
 
-.atte__date {
+.atte__date-search {
     display: flex;
     justify-content: center;
+    align-items: center;
 }
 
-.atte__date-search{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.search__date-form{
+    background:#F2F2F2;
+    border: none;
+    font-weight: bolder;
+    text-align: center;
+    font-size: larger;
+    width:150px;
 }
 
 .prev-date-button,

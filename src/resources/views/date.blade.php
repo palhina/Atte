@@ -9,26 +9,10 @@
         <div class="atte__date-container">
             <form action="/attendance" method="post">
             @csrf
-                <div class ="atte__date">
+                <div class ="atte__date-search">
                     <button type="button" class="prev-date-button">&lt;</button>
-                    <div class ="atte__date-search">
-                        <select name="year" class="year">
-                            @for($i=2015; $i <= 2030; $i++)
-                            <option value="{{$i}}" {{ $i == 2021 ? 'selected' : '' }}>{{$i}}</option>
-                            @endfor
-                        </select>
-                        <p class="date-select">-</p>
-                        <select name="month" class="month">
-                            @for($i=1; $i <= 12; $i++)
-                            <option value="{{$i}}" {{ $i == 11 ? 'selected' : '' }}>{{$i}}</option>
-                            @endfor
-                        </select>
-                        <p class="date-select">-</p>
-                        <select name="day" class="day">
-                            @for($i=01; $i <= 31; $i++)
-                            <option value="{{$i}}" {{ $i == 01 ? 'selected' : '' }}>{{$i}}</option>
-                            @endfor
-                        </select>
+                    <div class ="atte__date">
+                        <input  class="search__date-form" id="datetimeInput" type="text" name="search_date" value="{{ $format }}"/>
                     </div>
                     <button type="button" class="next-date-button">&gt;</button>
                     <button type="submit" class="submit-button" value="選択">選択</button>
