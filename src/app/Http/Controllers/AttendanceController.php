@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 
 class AttendanceController extends Controller
 {
+    // ログイン後のページ表示(出勤前、出勤後、休憩開始後のページ分岐)
     public function index()
     {
         $user = auth::user(); 	
@@ -62,6 +63,7 @@ class AttendanceController extends Controller
             return view('index', compact('user'));
         }
     }
+
     public function started()
     {
         $user = auth()->user(); 
@@ -74,6 +76,7 @@ class AttendanceController extends Controller
         return view('break', compact('user'));
     }
 
+    // 出勤アクション
     public function punchIn()
     {   
         $user = Auth::user();
@@ -94,6 +97,8 @@ class AttendanceController extends Controller
         return view('started',compact('user'));
 
     }
+
+    // 退勤アクション
     public function punchOut()
     {
         $user = Auth::user();
@@ -104,6 +109,8 @@ class AttendanceController extends Controller
         ]);
         return view('index',compact('user'));
     }
+
+    // 休憩開始アクション
     public function breakIn()
     {
         $user = Auth::user();
@@ -116,14 +123,22 @@ class AttendanceController extends Controller
             return view('break',compact('user'));
         }
     }
+
+    // 休憩終了アクション
     public function breakOut()
     {
         $user = auth()->user();
         $attendance = $user->attendance()->latest()->first();
         $breaktime = Breaktime::where('attendance_id',$attendance->id)->latest()->first();
+        $now = new Carbon();
+       
         if ($breaktime) {
+            $breakIn =  new Carbon($breaktime->breakin_time);
+            $workBreak = $breakIn->diffInSeconds($now);
+
             $breaktime->update([
                 'breakout_time' => Carbon::now(),
+                'workbreak_seconds' => $workBreak
             ]);
         }
         return view('started',compact('user'));
@@ -132,17 +147,25 @@ class AttendanceController extends Controller
     // 日付別勤怠管理ページへアクセス
         public function confirm()
     {
-        $user = Auth::user();
+        $user = auth()->user();
         $attendances = Attendance::with('user')->paginate(5);
-        // 現在の年月日を取得し表示する  
+        $breaktimes = Breaktime::whereIn('attendance_id',$attendances->pluck('id'))->get();
+        $breakDurationSeconds = $breaktimes->sum('workbreak_seconds');
+        // 現在の年月日を取得し表示する、あとで検索機能作成時に使用  
         $today = Carbon::today();	
         $month = intval($today->month);	
         $day = intval($today->day);	
         $format = $today->format('Y-m-d');
-        	
-        //当日の勤怠を取得	
-        $items = Attendance::GetMonthAttendance($month)->GetDayAttendance($day)->get();	
-        return view('date', compact('user', 'attendances', 'items', 'day', 'format'));
+
+        $breakTimeHours = floor($breakDurationSeconds / 3600);
+        $breakTimeMinutes = floor(($breakDurationSeconds % 3600) / 60);
+        $breakTimeSeconds = $breakDurationSeconds % 60;
+        $breakTimes = sprintf("%02d:%02d:%02d", $breakTimeHours, $breakTimeMinutes, $breakTimeSeconds);
+
+        
+        //当日の勤怠を検索し取得	
+        $items = Attendance::GetMonthAttendance($month)->GetDayAttendance($day)->get();
+        return view('date', compact('user', 'attendances', 'items', 'day', 'format','breakTimes'));
     }
     // 日付別勤怠ページ検索機能
     public function daily(Request $request) 

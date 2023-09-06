@@ -15,7 +15,8 @@ class Breaktime extends Model
     protected $fillable = [
         'attendance_id',
         'breakin_time', 
-        'breakout_time'
+        'breakout_time',
+        'workbreak_seconds'
     ];
     
      public function attendance()

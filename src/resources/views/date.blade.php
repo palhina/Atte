@@ -43,10 +43,10 @@
                             {{\Carbon\Carbon::parse($attendance->end_time)->format('H:i:s')}}
                         </td>
                         <td class="update-form__item">
-                            00:30:00
+                            {{$breakTimes}}
                         </td>
                         <td class="update-form__item">
-                            09:30:00
+                            後で訂正
                         </td>
                     </div>
                 </tr>

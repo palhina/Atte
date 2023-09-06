@@ -18,6 +18,7 @@ class CreateBreaktimesTable extends Migration
             $table->unsignedBigInteger('attendance_id');
             $table->timestamp('breakin_time')->nullable();
             $table->timestamp('breakout_time')->nullable();
+            $table->unsignedBigInteger('workbreak_seconds')->nullable();
             $table->timestamps();
             
             $table->foreign('attendance_id')->references('id')->on('attendances');
