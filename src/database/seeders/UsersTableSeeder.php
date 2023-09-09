@@ -4,7 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\User; 
+
 
 class UsersTableSeeder extends Seeder
 {
@@ -18,38 +19,38 @@ class UsersTableSeeder extends Seeder
     $users = [
         [
             'name' => 'テスト太郎',
-            'email' => 'test1@mail.com',
+            'email' => '111@mail.com',
             'password' =>Hash::make('1234567890'),
         ],
         [
             'name' => 'テスト次郎',
-            'email' => 'test2@mail.com',
+            'email' => '222@mail.com',
             'password' => Hash::make('1234567890')
         ],
         [
             'name' => 'テスト三郎',
-            'email' => 'test3@mail.com',
+            'email' => '333@mail.com',
             'password' => Hash::make('1234567890')
         ],
         [
             'name' => 'テスト四郎',
-            'email' => 'test4@mail.com',
+            'email' => '444@mail.com',
             'password' => Hash::make('1234567890')
         ],
         [
             'name' => 'テスト五郎',
-            'email' => 'test5@mail.com',
+            'email' => '555@mail.com',
             'password' => Hash::make('1234567890')
         ],
         [
             'name' => 'テスト六郎',
-            'email' => 'test6@mail.com',
+            'email' => '666@mail.com',
             'password' => Hash::make('1234567890')
         ],
     ];
     foreach ($users as $user) 
         {
-        DB::table('users')->insert([
+            User::create([
             'name' => $user['name'],
             'email' => $user['email'],
             'password' => $user['password'],

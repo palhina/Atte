@@ -22,11 +22,11 @@ Route::get('/register', [RegisteredUserController::class,'create']);
 Route::middleware('auth')->group(function () {
 Route::get('/home', [AttendanceController::class, 'home'])->name('home');
 // 打刻ページ表示
-Route::get('/', [AttendanceController::class,'index'])->name('index');
+Route::get('/', [AttendanceController::class,'index']);
 // 打刻ページ（勤務開始後）表示
-Route::get('/started', [AttendanceController::class,'started'])->name('started');
+Route::get('/started', [AttendanceController::class,'started']);
 // 打刻ページ（休憩開始後）表示
-Route::get('/break', [AttendanceController::class,'break'])->name('break');
+Route::get('/break', [AttendanceController::class,'break']);
 // 勤務開始ボタン選択後処理
 Route::post('/timein', [AttendanceController::class,'punchIn']);
 // 勤務終了ボタン選択時処理
@@ -36,9 +36,9 @@ Route::post('/breakin/{attendance}', [AttendanceController::class,'breakIn']);
 // 休憩終了ボタン
 Route::post('/breakout', [AttendanceController::class,'breakOut']);
 // dateページ表示
-Route::get('/attendance', [AttendanceController::class,'confirm']);
+Route::get('/date', [AttendanceController::class,'confirm']);
 // 日付別勤怠検索
-Route::post('/attendance', [AttendanceController::class,'daily']);
+Route::get('/attendance', [AttendanceController::class,'daily']);
 });
 
 
