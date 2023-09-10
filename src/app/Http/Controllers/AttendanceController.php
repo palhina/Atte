@@ -18,9 +18,11 @@ class AttendanceController extends Controller
         $user = auth::user(); 	
         // 出勤データ取得
         // ログイン者の一番最新の出勤履歴を取得しoldPunchIn変数に格納
-        $oldPunchIn = Attendance::where('user_id',$user->id)->latest()->first();
+        $oldPunchIn = Attendance::where('user_id',$user->id)
+        ->orderBy('created_at', 'desc')
+        ->first();
         $breakData = null; // 休憩データを初期化
-        // 以下、1日の出勤を1回にする処理
+
         //１．前回の出勤日はいつだったか？ 
         $oldday = '';
         //もしユーザーが以前に出勤していた際(oldPunchInが存在していた場合)の処理 
@@ -88,7 +90,7 @@ class AttendanceController extends Controller
         $day = intval($today->day);
         $year = intval($today->year);
 
-          // ユーザーの最新の出勤レコードを取得
+     // ユーザーの最新の出勤レコードを取得
         $latestAttendance = Attendance::where('user_id', $user->id)
         ->orderBy('created_at', 'desc')
         ->first();
@@ -111,6 +113,8 @@ class AttendanceController extends Controller
         ]);
          return view('started',compact('user'));
     }
+}
+
 
     // 退勤アクション
     public function punchOut()
@@ -172,7 +176,6 @@ class AttendanceController extends Controller
         }
         return view('break', compact('user'));
     }
-}
 
     // 休憩終了アクション
     public function breakOut()
@@ -180,16 +183,31 @@ class AttendanceController extends Controller
         $user = auth()->user();
         $attendance = $user->attendance()->latest()->first();
         $breaktime = Breaktime::where('attendance_id',$attendance->id)->latest()->first();
-        $now = new Carbon();
-       
+
+         // 休憩が翌日にまたがる場合の処理     
+        $now = Carbon::now();
         if ($breaktime) {
             $breakIn =  new Carbon($breaktime->breakin_time);
             $workBreak = $breakIn->diffInSeconds($now);
-
-            $breaktime->update([
-                'breakout_time' => Carbon::now(),
-                'workbreak_seconds' => $workBreak
-            ]);
+        
+            if ($now->lessThan($breaktime->breakin_time)) {
+                $nextDay = $breaktime->breakin_time->addDay();
+                $breaktime->update([
+                    'breakout_time' => $nextDay->setTime(0, 0), // 休憩終了を0時に設定
+                ]);
+                // 新しい休憩レコードを作成
+                $newBreaktime = new Breaktime();
+                $newBreaktime->attendance_id = $attendance->id;
+                $newBreaktime->breakin_time = $nextDay->setTime(0, 0); // 勤怠開始を0時に設定
+                $newBreaktime->breakout_time = $now; // 現在の時間を勤怠終了として設定
+                $newBreaktime->save();
+            } else {
+            // 通常の休憩終了処理
+                $breaktime->update([
+                    'breakout_time' => $now,
+                    'workbreak_seconds' => $workBreak
+                    ]);
+            }
         }
         return view('started',compact('user'));
     }
@@ -199,7 +217,8 @@ class AttendanceController extends Controller
     {
         $user = auth()->user();
         $attendances = Attendance::with('user')->paginate(5);
-        $breaktimes = Breaktime::whereIn('attendance_id',$attendances->pluck('id'))->get();
+        $attendanceId = $attendances->pluck('id');
+        $breaktimes = Breaktime::where('attendance_id',$attendanceId)->get();
         $breakDurationSeconds = $breaktimes->sum('workbreak_seconds');
         // 現在の年月日を取得し表示する、あとで検索機能作成時に使用  
         $today = Carbon::today();	
@@ -220,12 +239,10 @@ class AttendanceController extends Controller
     // 日付別勤怠ページ検索機能
     public function daily(Request $request) 
     {
-        $items = Attendance::
-            where('year',$request->year)
-            ->where('month',$request->month)
-            ->where('day',$request->day)
-            ->get();
-        return redirect('/attendance')->with('items', $items);
+        $query = $request->input('search_date');
+        $results = Attendance::whereDate('start_time',$query)->get();
+        session(['results' => $results]);
+        return redirect('/date');
     }
 }
 
