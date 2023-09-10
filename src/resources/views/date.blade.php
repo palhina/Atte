@@ -10,12 +10,11 @@
             <form action="/attendance" method="get">
             @csrf
                 <div class ="atte__date-search">
-                    <button type="button" class="prev-date-button">&lt;</button>
+                    <button type="submit" class="prev-date-button" value="{{ \Carbon\Carbon::parse($today)->subDay()->toDateString() }}">&lt;</button>
                     <div class ="atte__date">
-                        <input class="search__date-form" type="date" name="search_date" value="{{ $format }}" required/>
+                        <input class="search__date-form" type="text" name="search_date" value="{{ $today }}" required/>
                     </div>
-                    <button type="button" class="next-date-button">&gt;</button>
-                    <button type="submit" class="submit-button" value="選択">選択</button>
+                    <button type="submit" class="next-date-button" value="{{ \Carbon\Carbon::parse($today)->addDay()->toDateString() }}">&gt;</button>
                 </div>
             </form>
         </div>

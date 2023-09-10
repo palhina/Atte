@@ -113,7 +113,6 @@ class AttendanceController extends Controller
         ]);
          return view('started',compact('user'));
     }
-}
 
 
     // 退勤アクション
@@ -138,40 +137,41 @@ class AttendanceController extends Controller
         $user = Auth::user();
         if ($user) {
         // 最新の出勤レコードを取得
-        $latestAttendance = $user->attendance()->latest()->first();
+            $latestAttendance = $user->attendance()->latest()->first();
 
-        if ($latestAttendance) {
-            // 現在の時刻を取得
-            $currentTime = Carbon::now();
+            if ($latestAttendance) {
+                // 現在の時刻を取得
+                $currentTime = Carbon::now();
 
-            // 24時を表すCarbonオブジェクトを作成
-            $midnight = Carbon::today()->addHours(24);
+                // 24時を表すCarbonオブジェクトを作成
+                $midnight = Carbon::today()->addHours(24);
 
-            // 最新の休憩レコードを取得
-            $latestBreaktime = $latestAttendance->breaktimes()->latest()->first();
+                // 最新の休憩レコードを取得
+                $latestBreaktime = $latestAttendance->breaktimes()->latest()->first();
 
-            if ($latestBreaktime && $latestBreaktime->breakout_time === null) {
-                // 最新の休憩がまだ終了していない場合
+                if ($latestBreaktime && $latestBreaktime->breakout_time === null) {
+                    // 最新の休憩がまだ終了していない場合
 
-                // 24時を超えているかを確認
-                if ($currentTime->greaterThanOrEqualTo($midnight)) {
-                    // 24時を超えている場合、休憩終了時間を24時に設定
-                    $latestBreaktime->update([
-                        'breakout_time' => Carbon::today()->addHours(24)
-                    ]);
+                    // 24時を超えているかを確認
+                    if ($currentTime->greaterThanOrEqualTo($midnight)) {
+                        // 24時を超えている場合、休憩終了時間を24時に設定
+                        $latestBreaktime->update([
+                            'breakout_time' => Carbon::today()->addHours(24)
+                        ]);
+                    } else {
+                        // 24時を超えていない場合、通常の休憩開始を行う
+                        $breaktime = Breaktime::create([
+                            'attendance_id' => $latestAttendance->id,
+                            'breakin_time' => $currentTime,
+                        ]);
+                    }
                 } else {
-                    // 24時を超えていない場合、通常の休憩開始を行う
+                    // 最新の休憩がすでに終了している場合、新しい休憩を開始する
                     $breaktime = Breaktime::create([
                         'attendance_id' => $latestAttendance->id,
                         'breakin_time' => $currentTime,
                     ]);
                 }
-            } else {
-                // 最新の休憩がすでに終了している場合、新しい休憩を開始する
-                $breaktime = Breaktime::create([
-                    'attendance_id' => $latestAttendance->id,
-                    'breakin_time' => $currentTime,
-                ]);
             }
         }
         return view('break', compact('user'));
@@ -183,66 +183,34 @@ class AttendanceController extends Controller
         $user = auth()->user();
         $attendance = $user->attendance()->latest()->first();
         $breaktime = Breaktime::where('attendance_id',$attendance->id)->latest()->first();
-
-         // 休憩が翌日にまたがる場合の処理     
+   
         $now = Carbon::now();
         if ($breaktime) {
             $breakIn =  new Carbon($breaktime->breakin_time);
             $workBreak = $breakIn->diffInSeconds($now);
-        
-            if ($now->lessThan($breaktime->breakin_time)) {
-                $nextDay = $breaktime->breakin_time->addDay();
-                $breaktime->update([
-                    'breakout_time' => $nextDay->setTime(0, 0), // 休憩終了を0時に設定
-                ]);
-                // 新しい休憩レコードを作成
-                $newBreaktime = new Breaktime();
-                $newBreaktime->attendance_id = $attendance->id;
-                $newBreaktime->breakin_time = $nextDay->setTime(0, 0); // 勤怠開始を0時に設定
-                $newBreaktime->breakout_time = $now; // 現在の時間を勤怠終了として設定
-                $newBreaktime->save();
-            } else {
             // 通常の休憩終了処理
-                $breaktime->update([
-                    'breakout_time' => $now,
-                    'workbreak_seconds' => $workBreak
-                    ]);
+            $breaktime->update([
+                'breakout_time' => $now,
+                'workbreak_seconds' => $workBreak
+                ]);
             }
-        }
         return view('started',compact('user'));
     }
 
     // 日付別勤怠管理ページへアクセス
-        public function confirm()
+        public function daily(Request $request)
     {
         $user = auth()->user();
-        $attendances = Attendance::with('user')->paginate(5);
-        $attendanceId = $attendances->pluck('id');
-        $breaktimes = Breaktime::where('attendance_id',$attendanceId)->get();
-        $breakDurationSeconds = $breaktimes->sum('workbreak_seconds');
-        // 現在の年月日を取得し表示する、あとで検索機能作成時に使用  
-        $today = Carbon::today();	
-        $month = intval($today->month);	
-        $day = intval($today->day);	
-        $format = $today->format('Y-m-d');
-
-        $breakTimeHours = floor($breakDurationSeconds / 3600);
-        $breakTimeMinutes = floor(($breakDurationSeconds % 3600) / 60);
-        $breakTimeSeconds = $breakDurationSeconds % 60;
-        $breakTimes = sprintf("%02d:%02d:%02d", $breakTimeHours, $breakTimeMinutes, $breakTimeSeconds);
-
-        
-        //当日の勤怠を検索し取得	
-        $items = Attendance::GetMonthAttendance($month)->GetDayAttendance($day)->get();
-        return view('date', compact('user', 'attendances', 'items', 'day', 'format','breakTimes'));
+        $today = now()->toDateString(); // 本日の日付を取得
+        $attendances = Attendance::whereDate('start_time', $today)->paginate(5);
+        return view('date', compact('attendances','today'));
     }
-    // 日付別勤怠ページ検索機能
-    public function daily(Request $request) 
+    public function search(Request $request)
     {
-        $query = $request->input('search_date');
-        $results = Attendance::whereDate('start_time',$query)->get();
-        session(['results' => $results]);
-        return redirect('/date');
+        $date = $request->input('date'); // フォームから選択された日付を取得
+        $attendances = Attendance::whereDate('created_at', $date)->paginate(5);
+
+        return view('date', compact('attendances', 'date'));
     }
 }
 
