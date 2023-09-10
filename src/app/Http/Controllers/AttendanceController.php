@@ -80,6 +80,7 @@ class AttendanceController extends Controller
     public function punchIn()
     {   
         $user = Auth::user();
+        $now = Carbon::now();
 
         // 現在の年月日を整数で抽出（日付別勤怠ページへの前処理）
         $today = Carbon::today();
@@ -87,26 +88,43 @@ class AttendanceController extends Controller
         $day = intval($today->day);
         $year = intval($today->year);
 
+          // ユーザーの最新の出勤レコードを取得
+        $latestAttendance = Attendance::where('user_id', $user->id)
+        ->orderBy('created_at', 'desc')
+        ->first();
+
+        if ($latestAttendance && !$latestAttendance->end_time) {
+        // 最新の出勤レコードが存在し、まだ退勤していない場合、24時退勤の処理を行う
+        // 出勤と退勤が同日になるよう修正している
+        $latestAttendance->update([
+            'end_time' => $now->copy()->setHour(24)->setMinute(0)->setSecond(0),
+        ]);
+        } 
+        // 新しいidで出勤レコードを作成
         $attendance = Attendance::create([
             'user_id' => $user->id,
             'start_time' => Carbon::now(),
             'month' => $month,
             'day' => $day,
             'year' => $year,
+            'id' => $latestAttendance ? $latestAttendance->id + 1 : 1,
         ]);
-        return view('started',compact('user'));
-
+         return view('started',compact('user'));
     }
 
     // 退勤アクション
     public function punchOut()
     {
         $user = Auth::user();
-        $attendance = Attendance::where('user_id',$user->id)->latest()->first();
-        // ここに、日付が本日と違った場合(24時を回ったら)みたいな処理が入る？
-        $attendance->update([
-            'end_time' => Carbon::now(),
-        ]);
+        $latestAttendance = Attendance::where('user_id',$user->id)
+        ->orderBy('created_at', 'desc')
+        ->first();
+        if ($latestAttendance && !$latestAttendance->end_time) {
+        // 最新の出勤レコードが存在し、まだ退勤していない場合、退勤処理を行います
+            $latestAttendance->update([
+                'end_time' => Carbon::now(),
+            ]);
+        }
         return view('index',compact('user'));
     }
 
@@ -115,14 +133,46 @@ class AttendanceController extends Controller
     {
         $user = Auth::user();
         if ($user) {
-            $attendanceId = $user->attendance()->latest()->first()->id;
-            $breaktime = Breaktime::create([
-                'attendance_id' => $attendanceId,
-                'breakin_time' => Carbon::now(),
-            ]);
-            return view('break',compact('user'));
+        // 最新の出勤レコードを取得
+        $latestAttendance = $user->attendance()->latest()->first();
+
+        if ($latestAttendance) {
+            // 現在の時刻を取得
+            $currentTime = Carbon::now();
+
+            // 24時を表すCarbonオブジェクトを作成
+            $midnight = Carbon::today()->addHours(24);
+
+            // 最新の休憩レコードを取得
+            $latestBreaktime = $latestAttendance->breaktimes()->latest()->first();
+
+            if ($latestBreaktime && $latestBreaktime->breakout_time === null) {
+                // 最新の休憩がまだ終了していない場合
+
+                // 24時を超えているかを確認
+                if ($currentTime->greaterThanOrEqualTo($midnight)) {
+                    // 24時を超えている場合、休憩終了時間を24時に設定
+                    $latestBreaktime->update([
+                        'breakout_time' => Carbon::today()->addHours(24)
+                    ]);
+                } else {
+                    // 24時を超えていない場合、通常の休憩開始を行う
+                    $breaktime = Breaktime::create([
+                        'attendance_id' => $latestAttendance->id,
+                        'breakin_time' => $currentTime,
+                    ]);
+                }
+            } else {
+                // 最新の休憩がすでに終了している場合、新しい休憩を開始する
+                $breaktime = Breaktime::create([
+                    'attendance_id' => $latestAttendance->id,
+                    'breakin_time' => $currentTime,
+                ]);
+            }
         }
+        return view('break', compact('user'));
     }
+}
 
     // 休憩終了アクション
     public function breakOut()
