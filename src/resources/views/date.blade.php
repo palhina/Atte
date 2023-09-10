@@ -6,16 +6,19 @@
 
 @section('content')
     <div class="atte__content">
-        <div class="atte__date-container">
-            <form action="/attendance" method="get">
+        <div class ="atte__date-search">
+            <form method="post" action="/attendance">
             @csrf
-                <div class ="atte__date-search">
-                    <button type="submit" class="prev-date-button" value="{{ \Carbon\Carbon::parse($today)->subDay()->toDateString() }}">&lt;</button>
-                    <div class ="atte__date">
-                        <input class="search__date-form" type="text" name="search_date" value="{{ $today }}" required/>
-                    </div>
-                    <button type="submit" class="next-date-button" value="{{ \Carbon\Carbon::parse($today)->addDay()->toDateString() }}">&gt;</button>
-                </div>
+                <input type="hidden" name="date" value="{{ $previousDate }}">
+                <button type="submit" class="prev-date-button">&lt;</button>
+            </form>
+            <div class ="atte__date">
+                <p class="search__date-form"> {{ $selectedDate }}</p> 
+            </div>
+            <form method="post" action="/attendance">
+            @csrf
+                <input type="hidden" name="date" value="{{ $nextDate }}">
+                <button type="submit" class="next-date-button">&gt;</button>
             </form>
         </div>
         <div class="atte__customer">

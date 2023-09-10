@@ -57,11 +57,11 @@ class AttendancesTableSeeder extends Seeder
             ],
             [
                 'user_id' => 6,
-                'start_time' => '2023-08-30 08:00:20',
-                'end_time' => '2023-08-30 20:00:00',
+                'start_time' => '2023-09-09 08:00:20',
+                'end_time' => '2023-09-09 20:00:00',
                 'year' => '2023',
-                'month' => '08',
-                'day' => '30'
+                'month' => '09',
+                'day' => '9'
             ]
         ];
         foreach ($attendances as $attendance) 

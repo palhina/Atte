@@ -197,20 +197,16 @@ class AttendanceController extends Controller
         return view('started',compact('user'));
     }
 
-    // 日付別勤怠管理ページへアクセス
+    // 日付別勤怠管理ページへアクセス＋本日の日付での出退勤検索結果表示し、日付ページ遷移
         public function daily(Request $request)
     {
-        $user = auth()->user();
-        $today = now()->toDateString(); // 本日の日付を取得
-        $attendances = Attendance::whereDate('start_time', $today)->paginate(5);
-        return view('date', compact('attendances','today'));
-    }
-    public function search(Request $request)
-    {
-        $date = $request->input('date'); // フォームから選択された日付を取得
-        $attendances = Attendance::whereDate('created_at', $date)->paginate(5);
+        $selectedDate = $request->input('date', Carbon::now()->toDateString());
+        // 前日と翌日を計算
+        $previousDate = Carbon::parse($selectedDate)->subDay()->toDateString();
+        $nextDate = Carbon::parse($selectedDate)->addDay()->toDateString();
+        $attendances = Attendance::whereDate('start_time', $selectedDate)->paginate(5);
 
-        return view('date', compact('attendances', 'date'));
+        return view('date', compact('attendances','selectedDate', 'previousDate', 'nextDate'));
     }
 }
 

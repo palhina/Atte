@@ -37,7 +37,8 @@ Route::post('/breakin/{attendance}', [AttendanceController::class,'breakIn']);
 Route::post('/breakout', [AttendanceController::class,'breakOut']);
 // dateページ表示
 Route::get('/attendance', [AttendanceController::class,'daily']);
-Route::post('/attendance', [AttendanceController::class,'daily.search']);
+// dateページ日付遷移
+Route::post('/attendance', [AttendanceController::class,'daily']);
 });
 
 
