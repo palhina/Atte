@@ -199,14 +199,26 @@ class AttendanceController extends Controller
 
     // 日付別勤怠管理ページへアクセス＋本日の日付での出退勤検索結果表示し、日付ページ遷移
         public function daily(Request $request)
-    {
+    {   
         $selectedDate = $request->input('date', Carbon::now()->toDateString());
         // 前日と翌日を計算
         $previousDate = Carbon::parse($selectedDate)->subDay()->toDateString();
         $nextDate = Carbon::parse($selectedDate)->addDay()->toDateString();
         $attendances = Attendance::whereDate('start_time', $selectedDate)->paginate(5);
+        // 休憩時間計算、秒→時：分：秒の形へ変更
+        $breaktimes = Breaktime::whereIn('attendance_id', $attendances->pluck('id'))->get();
+        $workDurations = $breaktimes->groupBy('attendance_id')
+        ->map(function($group){
+            return $group->sum('workbreak_seconds');
+        });
+        $workDurations = $workDurations->map(function($value){
+        $breakTimeHours = floor($value / 3600);
+        $breakTimeMinutes = floor(($value % 3600) / 60);
+        $breakTimeSeconds = $value % 60;
+        return sprintf("%02d:%02d:%02d", $breakTimeHours, $breakTimeMinutes, $breakTimeSeconds);
+        });
 
-        return view('date', compact('attendances','selectedDate', 'previousDate', 'nextDate'));
+        return view('date', compact('attendances','selectedDate', 'previousDate', 'nextDate','workDurations'));
     }
 }
 

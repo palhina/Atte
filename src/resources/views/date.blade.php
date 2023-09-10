@@ -45,7 +45,11 @@
                             {{\Carbon\Carbon::parse($attendance->end_time)->format('H:i:s')}}
                         </td>
                         <td class="update-form__item">
-                            訂正中
+                            @if (isset($workDurations[$attendance->id]))
+                                {{ $workDurations[$attendance->id] }}
+                            @else
+                                0:00:00
+                            @endif
                         </td>
                         <td class="update-form__item">
                             後で訂正
