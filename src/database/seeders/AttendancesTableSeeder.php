@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\Attendance; 
 
 class AttendancesTableSeeder extends Seeder
 {
@@ -66,7 +66,7 @@ class AttendancesTableSeeder extends Seeder
         ];
         foreach ($attendances as $attendance) 
         {
-        DB::table('attendances')->insert([
+            Attendance::create([
             'user_id' => $attendance['user_id'],
             'start_time' => $attendance['start_time'],
             'end_time' => $attendance['end_time'],

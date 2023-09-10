@@ -7,12 +7,12 @@
 @section('content')
     <div class="atte__content">
         <div class="atte__date-container">
-            <form action="/attendance" method="post">
+            <form action="/attendance" method="get">
             @csrf
                 <div class ="atte__date-search">
                     <button type="button" class="prev-date-button">&lt;</button>
                     <div class ="atte__date">
-                        <input  class="search__date-form" id="datetimeInput" type="text" name="search_date" value="{{ $format }}"/>
+                        <input class="search__date-form" type="date" name="search_date" value="{{ $format }}" required/>
                     </div>
                     <button type="button" class="next-date-button">&gt;</button>
                     <button type="submit" class="submit-button" value="選択">選択</button>
@@ -43,7 +43,7 @@
                             {{\Carbon\Carbon::parse($attendance->end_time)->format('H:i:s')}}
                         </td>
                         <td class="update-form__item">
-                            {{$breakTimes}}
+                            訂正中
                         </td>
                         <td class="update-form__item">
                             後で訂正
