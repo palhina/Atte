@@ -45,14 +45,16 @@
                             {{\Carbon\Carbon::parse($attendance->end_time)->format('H:i:s')}}
                         </td>
                         <td class="update-form__item">
-                            @if (isset($workDurations[$attendance->id]))
-                                {{ $workDurations[$attendance->id] }}
+                            @if (isset($breakTimes[$attendance->id]))
+                                {{ $breakTimes[$attendance->id] }}
                             @else
-                                0:00:00
+                                00:00:00
                             @endif
                         </td>
                         <td class="update-form__item">
-                            後で訂正
+                            @if (isset($workTimes[$attendance->id]))
+                                {{ $workTimes[$attendance->id] }}
+                            @endif
                         </td>
                     </div>
                 </tr>

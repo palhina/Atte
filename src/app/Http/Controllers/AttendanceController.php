@@ -24,7 +24,7 @@ class AttendanceController extends Controller
         $breakData = null; // 休憩データを初期化
 
         //１．前回の出勤日はいつだったか？ 
-        $oldday = '';
+        $oldDay = '';
         //もしユーザーが以前に出勤していた際(oldPunchInが存在していた場合)の処理 
         if ($oldPunchIn) 
         {
@@ -38,30 +38,33 @@ class AttendanceController extends Controller
         // ２．今日の日付取得
         $today = Carbon::today();
 
-
+        if($oldDay){
         // １と２が同じ時（既に今日出勤が押されている場合）の分岐
-        if ($oldDay->isSameDay($today)){
-            // かつ、退勤時間が存在しない場合
-            if (!$oldPunchIn->end_time) {
-                if($breakData){
-                // 休憩開始データ,休憩終了データがある場合
-                    if($breakData && $breakData->breakout_time){
+            if ($oldDay->isSameDay($today)){
+                // かつ、退勤時間が存在しない場合
+                if (!$oldPunchIn->end_time) {
+                    if($breakData){
+                    // 休憩開始データ,休憩終了データがある場合
+                        if($breakData && $breakData->breakout_time){
+                            return view('started', compact('user'));
+                    // 休憩開始時間が存在し、休憩終了時間は存在しない場合
+                        }else if($breakData->breakin_time && !$breakData->breakout_time){
+                            return view('break', compact('user'));
+                        }
+                    }else{
+                    // 休憩開始データがない場合
                         return view('started', compact('user'));
-                // 休憩開始時間が存在し、休憩終了時間は存在しない場合
-                    }else if($breakData->breakin_time && !$breakData->breakout_time){
-                        return view('break', compact('user'));
                     }
                 }else{
-                // 休憩開始データがない場合
-                    return view('started', compact('user'));
+                    // 退勤時間が存在していた場合の処理
+                    return view('index', compact('user'));
                 }
-            }else{
-                // 退勤時間が存在していた場合の処理
+            }
+            // 今日まだ出勤開始を押していない場合
+            else{
                 return view('index', compact('user'));
             }
-        }
-        // 今日まだ出勤開始を押していない場合
-        else{
+        }else{
             return view('index', compact('user'));
         }
     }
@@ -200,25 +203,40 @@ class AttendanceController extends Controller
     // 日付別勤怠管理ページへアクセス＋本日の日付での出退勤検索結果表示し、日付ページ遷移
         public function daily(Request $request)
     {   
+         // 日付検索部分
         $selectedDate = $request->input('date', Carbon::now()->toDateString());
-        // 前日と翌日を計算
         $previousDate = Carbon::parse($selectedDate)->subDay()->toDateString();
         $nextDate = Carbon::parse($selectedDate)->addDay()->toDateString();
         $attendances = Attendance::whereDate('start_time', $selectedDate)->paginate(5);
-        // 休憩時間計算、秒→時：分：秒の形へ変更
-        $breaktimes = Breaktime::whereIn('attendance_id', $attendances->pluck('id'))->get();
-        $workDurations = $breaktimes->groupBy('attendance_id')
+        // 各出勤毎の休憩時間合計を計算(秒→時：分：秒の形へ変更)
+        $breaks = Breaktime::whereIn('attendance_id', $attendances->pluck('id'))->get();
+        $breakTimes = $breaks->groupBy('attendance_id')
         ->map(function($group){
             return $group->sum('workbreak_seconds');
+        })
+        ->map(function($value){
+            $breakTimeHours = floor($value / 3600);
+            $breakTimeMinutes = floor(($value % 3600) / 60);
+            $breakTimeSeconds = $value % 60;
+            return sprintf("%02d:%02d:%02d", $breakTimeHours, $breakTimeMinutes, $breakTimeSeconds);
         });
-        $workDurations = $workDurations->map(function($value){
-        $breakTimeHours = floor($value / 3600);
-        $breakTimeMinutes = floor(($value % 3600) / 60);
-        $breakTimeSeconds = $value % 60;
-        return sprintf("%02d:%02d:%02d", $breakTimeHours, $breakTimeMinutes, $breakTimeSeconds);
-        });
+        // 各出勤毎の勤務時間計算
+        $workTimes = [];
+        foreach ($attendances as $attendance) {
+            $start_time = $attendance->start_time;
+            $end_time = $attendance->end_time;
+            $workStart = Carbon::parse($start_time);
+            $workEnd = Carbon::parse($end_time);
+            $workDurationTime =  $workStart->diffInSeconds($workEnd);
+            $workDurationTime -= $breaks->where('attendance_id', $attendance->id)->sum('workbreak_seconds');
 
-        return view('date', compact('attendances','selectedDate', 'previousDate', 'nextDate','workDurations'));
+            $workTimeHours = floor($workDurationTime / 3600);
+            $workTimeMinutes = floor(($workDurationTime % 3600) / 60);
+            $workTimeSeconds = $workDurationTime % 60;
+            $workTimes[$attendance->id] = sprintf("%02d:%02d:%02d", $workTimeHours, $workTimeMinutes, $workTimeSeconds);
+        }
+        return view('date', compact('attendances','selectedDate', 'previousDate', 'nextDate','breakTimes','workTimes'));
     }
 }
+
 
