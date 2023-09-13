@@ -27,7 +27,15 @@ class FortifyServiceProvider extends ServiceProvider
      * Bootstrap any application services.
      */
     public function boot()
-    {   Fortify::verifyEmailView(function(){
+    {   
+        Fortify::createUsersUsing(CreateNewUser::class);
+        Fortify::registerView(function(){
+            return view('auth.register');
+        });
+        Fortify::loginView(function(){
+            return view('auth.login');
+        });
+        Fortify::verifyEmailView(function(){
             return view('auth.verify-email');
         });
         Fortify::confirmPasswordView(function(){
@@ -35,13 +43,6 @@ class FortifyServiceProvider extends ServiceProvider
         });
         Fortify::twoFactorChallengeView(function(){
             return view('auth.two-factor-challenge');
-        });
-        Fortify::createUsersUsing(CreateNewUser::class);
-        Fortify::registerView(function(){
-            return view('auth.register');
-        });
-        Fortify::loginView(function(){
-            return view('auth.login');
         });
         
         RateLimiter::for('login', function (Request $request) {

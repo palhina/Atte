@@ -1,27 +1,27 @@
 @extends('layouts.app')
 
+@section('css')
+<link rel="stylesheet" href="{{ asset('css/verify_email.css') }}">
+@endsection
+
 @section('content')
 <div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('Verify Your Email Address') }}</div>
-
-                <div class="card-body">
-                    @if (session('resent'))
-                        <div class="alert alert-success" role="alert">
-                            {{ __('A fresh verification link has been sent to your email address.') }}
-                        </div>
-                    @endif
-
-                    {{ __('Before proceeding, please check your email for a verification link.') }}
-                    {{ __('If you did not receive the email') }},
-                    <form class="d-inline" method="POST" action="{{ route('verification.send') }}">
-                        @csrf
-                        <button type="submit" class="btn btn-link p-0 m-0 align-baseline">{{ __('click here to request another') }}</button>.
-                    </form>
+    <div class="card_txt">
+        @if (session('resent'))
+                <div class="alert_success" role="alert">
+                    {{ __('メールを再送信しました') }}
                 </div>
-            </div>
+        @endif
+        <div class="card_header">{{ __('二段階認証') }}</div>
+        <div class="card_body">
+            <div class="email_text">
+            <p>{{ __('登録されたアドレスにメールを送信しました。') }}</p>
+            <p>{{ __('メール内のリンクを確認してください。') }}</p>
+            <p>{{ __('メールが届かない場合は以下のボタンを押してください。') }}</p>
+            <form class="mail_resend_btn" method="POST" action="{{ route('verification.send') }}">
+                @csrf
+                <button type="submit" class="mail_resend_link">{{ __('メール再送信') }}</button>
+            </form>
         </div>
     </div>
 </div>

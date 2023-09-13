@@ -19,8 +19,8 @@ use Laravel\Fortify\Fortify;
 Route::get('/register', [RegisteredUserController::class,'create']);
 
 // 以下ログイン時のみ有効な動作
-    Route::middleware(['auth','verify'])->group(function(){
-    Route::get('/home', [AttendanceController::class, 'home'])->name('home');
+Route::middleware('verified')->group(function(){
+    Route::get('/home', [AttendanceController::class, 'home']);
     // 打刻ページ表示
     Route::get('/', [AttendanceController::class,'index']);
     // 打刻ページ（勤務開始後）表示
