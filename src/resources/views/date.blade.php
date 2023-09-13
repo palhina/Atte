@@ -42,7 +42,11 @@
                             {{\Carbon\Carbon::parse($attendance->start_time)->format('H:i:s')}}
                         </td>
                         <td class="update-form__item">
-                            {{\Carbon\Carbon::parse($attendance->end_time)->format('H:i:s')}}
+                            @if(isset($attendance->end_time))
+                                {{\Carbon\Carbon::parse($attendance->end_time)->format('H:i:s')}}
+                            @else
+                                ―
+                            @endif
                         </td>
                         <td class="update-form__item">
                             @if (isset($breakTimes[$attendance->id]))

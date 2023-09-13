@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RegisteredUserController;
 use App\Http\Controllers\AuthenticatedSessionController;
 use App\Http\Controllers\AttendanceController;
+use Laravel\Fortify\Fortify;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -17,28 +18,27 @@ use App\Http\Controllers\AttendanceController;
 
 Route::get('/register', [RegisteredUserController::class,'create']);
 
-
 // 以下ログイン時のみ有効な動作
-Route::middleware('auth')->group(function () {
-Route::get('/home', [AttendanceController::class, 'home'])->name('home');
-// 打刻ページ表示
-Route::get('/', [AttendanceController::class,'index']);
-// 打刻ページ（勤務開始後）表示
-Route::get('/started', [AttendanceController::class,'started']);
-// 打刻ページ（休憩開始後）表示
-Route::get('/break', [AttendanceController::class,'break']);
-// 勤務開始ボタン選択後処理
-Route::post('/timein', [AttendanceController::class,'punchIn']);
-// 勤務終了ボタン選択時処理
-Route::post('/timeout', [AttendanceController::class,'punchOut']);
-// 休憩開始ボタン選択
-Route::post('/breakin/{attendance}', [AttendanceController::class,'breakIn']);
-// 休憩終了ボタン
-Route::post('/breakout', [AttendanceController::class,'breakOut']);
-// dateページ表示
-Route::get('/attendance', [AttendanceController::class,'daily']);
-// dateページ日付遷移
-Route::post('/attendance', [AttendanceController::class,'daily']);
+    Route::middleware(['auth','verify'])->group(function(){
+    Route::get('/home', [AttendanceController::class, 'home'])->name('home');
+    // 打刻ページ表示
+    Route::get('/', [AttendanceController::class,'index']);
+    // 打刻ページ（勤務開始後）表示
+    Route::get('/started', [AttendanceController::class,'started']);
+    // 打刻ページ（休憩開始後）表示
+    Route::get('/break', [AttendanceController::class,'break']);
+    // 勤務開始ボタン選択後処理
+    Route::post('/timein', [AttendanceController::class,'punchIn']);
+    // 勤務終了ボタン選択時処理
+    Route::post('/timeout', [AttendanceController::class,'punchOut']);
+    // 休憩開始ボタン選択
+    Route::post('/breakin/{attendance}', [AttendanceController::class,'breakIn']);
+    // 休憩終了ボタン
+    Route::post('/breakout', [AttendanceController::class,'breakOut']);
+    // dateページ表示
+    Route::get('/attendance', [AttendanceController::class,'daily']);
+    // dateページ日付遷移
+    Route::post('/attendance', [AttendanceController::class,'daily']);
 });
 
 
