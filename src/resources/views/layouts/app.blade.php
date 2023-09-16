@@ -21,6 +21,8 @@
                 @if (Auth::check())
                     <li class="header-nav-item"><a href="{{'/'}}">ホーム</a></li>
                     <li class="header-nav-item"><a href="{{'/attendance'}}">日付一覧</a></li>
+                    <li class="header-nav-item"><a href="{{'/users'}}">ユーザー一覧</a></li>
+                    <li class="header-nav-item"><a href="{{'/user_atte'}}">ユーザー別勤怠一覧</a></li>
                     <li class="header-nav-item"> 
                         <form class="form" action="/logout" method="post">
                         @csrf

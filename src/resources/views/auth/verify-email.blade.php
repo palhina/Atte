@@ -7,12 +7,9 @@
 @section('content')
 <div class="container">
     <div class="card_txt">
-        @if (session('resent'))
-                <div class="alert_success" role="alert">
-                    {{ __('メールを再送信しました') }}
-                </div>
-        @endif
-        <div class="card_header">{{ __('二段階認証') }}</div>
+        <div class="card_header">
+            {{ __('二段階認証') }}
+        </div>
         <div class="card_body">
             <div class="email_text">
             <p>{{ __('登録されたアドレスにメールを送信しました。') }}</p>

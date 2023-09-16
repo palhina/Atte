@@ -18,7 +18,6 @@ use Laravel\Fortify\Fortify;
 
 Route::get('/register', [RegisteredUserController::class,'create']);
 
-// 以下ログイン時のみ有効な動作
 Route::middleware('verified')->group(function(){
     Route::get('/home', [AttendanceController::class, 'home']);
     // 打刻ページ表示
@@ -39,6 +38,10 @@ Route::middleware('verified')->group(function(){
     Route::get('/attendance', [AttendanceController::class,'daily']);
     // dateページ日付遷移
     Route::post('/attendance', [AttendanceController::class,'daily']);
+    // ユーザー一覧表示
+    Route::get('/users', [AttendanceController::class,'userList']);
+    // ユーザー別勤怠表示
+    Route::get('/user_atte', [AttendanceController::class,'attePerUser']);
 });
 
-
+    
