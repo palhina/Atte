@@ -20,30 +20,40 @@
                         <th class="customer-table__header-span">勤務時間</th>
                     </div>
                 </tr>
-                <!-- アットフォーリーチ -->
+                @foreach ($attendances as $attendance)
                 <tr class="customer-table__row">
                     <div class="customer-table__item">
                         <td class="update-form__item">
-                            2000/01/01
+                            {{\Carbon\Carbon::parse($attendance->start_time)->format('Y-m-d')}}
                         </td>
                         <td class="update-form__item">
-                            09:00
+                            {{\Carbon\Carbon::parse($attendance->start_time)->format('H:i:s')}}
                         </td>
                         <td class="update-form__item">
-                            18:00
+                            @if(isset($attendance->end_time))
+                                {{\Carbon\Carbon::parse($attendance->end_time)->format('H:i:s')}}
+                            @else
+                                ―
+                            @endif
                         </td>
                         <td class="update-form__item">
-                            01:00
+                             @if (isset($breakTimes[$attendance->id]))
+                                {{ $breakTimes[$attendance->id] }}
+                            @else
+                                00:00:00
+                            @endif
                         </td>
                         <td class="update-form__item">
-                            08:00
+                             @if (isset($workTimes[$attendance->id]))
+                                {{ $workTimes[$attendance->id] }}
+                            @endif
                         </td>
                     </div>
                 </tr>
-                <!-- エンドフォーリーチ -->
+                @endforeach
             </table>
         <div class="pagination">
-            <!-- ページネーション -->
+            {{$attendances->links('vendor.pagination.custom')}}
         </div>
     </div>
 @endsection

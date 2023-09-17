@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Requests\RegisterRequest;
+use App\Models\User;
 use App\Models\Attendance;
 use App\Models\Breaktime;
 use Carbon\Carbon;
@@ -73,38 +74,17 @@ class AttendanceController extends Controller
         $month = intval($today->month);
         $day = intval($today->day);
         $year = intval($today->year);
-        $midnight = $today->copy()->addHours(24);
         $latestAttendance = Attendance::where('user_id', $user->id)
         ->orderBy('created_at', 'desc')
         ->first();
-
-        if($now->greaterThanOrEqualTo($midnight)){
-            if ($latestAttendance && !$latestAttendance->end_time) {
-            // 最新の出勤レコードが存在し、まだ退勤していない場合、24時退勤の処理を行う
-            // 出勤と退勤が同日になるよう修正している
-            $latestAttendance->update([
-                'end_time' => $now->copy()->setHour(24)->setMinute(0)->setSecond(0),
-            ]);
-            } 
-            // 新しいidで出勤レコードを作成
-
-            $attendance = Attendance::create([
-                'user_id' => $user->id,
-                'start_time' =>  $now->copy()->setHour(24)->setMinute(0)->setSecond(0),
-                'month' => $month,
-                'day' => $day,
-                'year' => $year,
-            ]);
-        }else{
-            $attendance = Attendance::create([
-                    'user_id' => $user->id,
-                    'start_time' =>  $now,
-                    'end_time' => null,
-                    'month' => $month,
-                    'day' => $day,
-                    'year' => $year,
-                ]);
-        }
+        $attendance = Attendance::create([
+            'user_id' => $user->id,
+            'start_time' =>  $now,
+            'end_time' => null,
+            'month' => $month,
+            'day' => $day,
+            'year' => $year,
+        ]);
         return view('started',compact('user'));
   }
 
@@ -134,26 +114,10 @@ class AttendanceController extends Controller
         $latestBreak = Breaktime::where('attendance_id', $attendance->id)
         ->orderBy('created_at', 'desc')
         ->first();
-        $midnight = $today->copy()->addHours(24);
-        // 24時を超えた場合、24時休憩終了0時休憩開始とする。超えていなければ通常の休憩処理を行う。
-        if($now->greaterThanOrEqualTo($midnight)){
-            if ($latestBreak && !$latestBreak->breakend_time) {
-                $latestBreak->update([
-                    'breakout_time' => $now->copy()->setHour(24)->setMinute(0)->setSecond(0),
-                ]);
-            // 新しいidで出勤レコードを作成
-                $nextDay = $today->copy()->addDay();
-                $breaktimes = Breaktime::create([
-                    'attendance_id' => $attendance->id,
-                    'breakin_time' =>  $now->copy()->setHour(24)->setMinute(0)->setSecond(0),
-                ]);
-            }else{
-                $breaktimes = Breaktime::create([
-                'attendance_id' => $attendance->id,
-                'breakin_time' =>  $now,
-                ]);
-            }
-        }
+        $breaktimes = Breaktime::create([
+        'attendance_id' => $attendance->id,
+        'breakin_time' =>  $now,
+        ]);
         return view('break', compact('user'));
     }
 
@@ -168,7 +132,6 @@ class AttendanceController extends Controller
         if ($breaktime) {
             $breakIn =  new Carbon($breaktime->breakin_time);
             $workBreak = $breakIn->diffInSeconds($now);
-            // 通常の休憩終了処理
             $breaktime->update([
                 'breakout_time' => $now,
                 'workbreak_seconds' => $workBreak
@@ -215,15 +178,49 @@ class AttendanceController extends Controller
         return view('date', compact('attendances','selectedDate', 'previousDate', 'nextDate','breakTimes','workTimes'));
     }
 
+    // ユーザー一覧表示
     public function userList()
     {
-        $users = User::where('id',id)->get;
-        return view('user_list', compact('users'));
+        $users = User::select('name')->paginate(5);
+        return view('user_list',compact('users'));
     }
+
+    // ユーザー別勤怠一覧表示
     public function attePerUser()
     {
-        $user = auth()->user(); 
-        return view('atte_per_user', compact('user'));
+        $userId = auth()->user()->id; 
+        $user = User::find($userId);
+        $attendances = Attendance::where('user_id',$userId)->orderBy('created_at', 'desc')
+        ->paginate(5);
+        
+        // 各出勤毎の休憩時間合計を計算(秒→時：分：秒の形へ変更)
+        $breaks = Breaktime::whereIn('attendance_id', $attendances->pluck('id'))->get();
+        $breakTimes = $breaks->groupBy('attendance_id')
+        ->map(function($group){
+            return $group->sum('workbreak_seconds');
+        })
+        ->map(function($value){
+            $breakTimeHours = floor($value / 3600);
+            $breakTimeMinutes = floor(($value % 3600) / 60);
+            $breakTimeSeconds = $value % 60;
+            return sprintf("%02d:%02d:%02d", $breakTimeHours, $breakTimeMinutes, $breakTimeSeconds);
+        });
+        // 各出勤毎の労働時間計算(秒→時：分：秒の形へ変更)
+        $workTimes = [];
+        foreach ($attendances as $attendance) {
+            $start_time = $attendance->start_time;
+            $end_time = $attendance->end_time;
+            $workStart = Carbon::parse($start_time);
+            $workEnd = Carbon::parse($end_time);
+            $workDurationTime =  $workStart->diffInSeconds($workEnd);
+            $workDurationTime -= $breaks->where('attendance_id', $attendance->id)->sum('workbreak_seconds');
+
+            $workTimeHours = floor($workDurationTime / 3600);
+            $workTimeMinutes = floor(($workDurationTime % 3600) / 60);
+            $workTimeSeconds = $workDurationTime % 60;
+            $workTimes[$attendance->id] = sprintf("%02d:%02d:%02d", $workTimeHours, $workTimeMinutes, $workTimeSeconds);
+        }
+        return view('atte_per_user', compact('attendances','user','breakTimes','workTimes'));
     }
 
 }

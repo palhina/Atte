@@ -40,7 +40,7 @@ Route::middleware('verified')->group(function(){
     Route::post('/attendance', [AttendanceController::class,'daily']);
     // ユーザー一覧表示
     Route::get('/users', [AttendanceController::class,'userList']);
-    // ユーザー別勤怠表示
+     // ユーザー別勤怠表示
     Route::get('/user_atte', [AttendanceController::class,'attePerUser']);
 });
 

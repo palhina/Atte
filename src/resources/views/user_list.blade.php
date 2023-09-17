@@ -16,7 +16,7 @@
                         <th class="customer-table__header-span">名前</th>
                     </div>
                 </tr>
-                @foreach($users as user)
+                @foreach($users as $user)
                 <tr class="customer-table__row">
                     <div class="customer-table__item">
                         <td class="update-form__item">
@@ -27,7 +27,7 @@
                 @endforeach
             </table>
         <div class="pagination">
-            <!-- ページネーション挿入 -->
+            {{$users->links('vendor.pagination.custom')}}
         </div>
     </div>
 @endsection
