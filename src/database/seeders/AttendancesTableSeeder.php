@@ -19,7 +19,6 @@ class AttendancesTableSeeder extends Seeder
                 'user_id' => 1,
                 'start_time' => '2021-11-01 10:00:00',
                 'end_time' => '2021-11-01 20:00:00',
-                'year' => '2021',
                 'month' => '11',
                 'day' => '01'
             ],
@@ -27,7 +26,6 @@ class AttendancesTableSeeder extends Seeder
                 'user_id' => 2,
                 'start_time' => '2021-11-01 10:00:10',
                 'end_time' => '2021-11-01 20:00:00',
-                'year' => '2021',
                 'month' => '11',
                 'day' => '01'
             ],
@@ -35,7 +33,6 @@ class AttendancesTableSeeder extends Seeder
                 'user_id' => 3,
                 'start_time' => '2021-11-01 10:00:10',
                 'end_time' => '2021-11-01 20:00:00',
-                'year' => '2021',
                 'month' => '11',
                 'day' => '01'
             ],
@@ -43,7 +40,6 @@ class AttendancesTableSeeder extends Seeder
                 'user_id' => 4,
                 'start_time' => '2021-11-01 10:00:20',
                 'end_time' => '2021-11-01 20:00:00',
-                'year' => '2021',
                 'month' => '11',
                 'day' => '01'
             ],
@@ -51,7 +47,6 @@ class AttendancesTableSeeder extends Seeder
                 'user_id' => 5,
                 'start_time' => '2021-11-01 10:00:20',
                 'end_time' => '2021-11-01 20:00:00',
-                'year' => '2021',
                 'month' => '11',
                 'day' => '01'
             ],
@@ -59,7 +54,6 @@ class AttendancesTableSeeder extends Seeder
                 'user_id' => 6,
                 'start_time' => '2023-09-09 08:00:20',
                 'end_time' => '2023-09-09 20:00:00',
-                'year' => '2023',
                 'month' => '09',
                 'day' => '9'
             ]
@@ -70,7 +64,6 @@ class AttendancesTableSeeder extends Seeder
             'user_id' => $attendance['user_id'],
             'start_time' => $attendance['start_time'],
             'end_time' => $attendance['end_time'],
-            'year' => $attendance['year'],
             'month' => $attendance['month'],
             'day' => $attendance['day'],
         ]);

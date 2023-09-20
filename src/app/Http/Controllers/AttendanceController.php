@@ -18,47 +18,42 @@ class AttendanceController extends Controller
     {
         $user = auth::user(); 	
         $today = Carbon::today();
-        $oldPunchIn = Attendance::where('user_id',$user->id)
+        $latestAttendance = Attendance::where('user_id',$user->id)
         ->orderBy('created_at', 'desc')
         ->first();
         $breakData = null;
-        $oldDay = '';// 前回の出勤日
-        //前回の出勤に関連する休憩データを取得
-        if ($oldPunchIn) 
+        
+        if ($latestAttendance) //最新出勤データがある場合
         {
-            $oldTimePunchIn = new Carbon($oldPunchIn->start_time);
-            $oldDay = $oldTimePunchIn->startOfDay();
-            $breakData = Breaktime::where('attendance_id', $oldPunchIn->id)->latest()->first();
-        }
-        if($oldDay){ // ログインページからのアクセス
-            if ($oldDay->isSameDay($today)){// 本日既に出勤している場合
-                if (!$oldPunchIn->end_time) {
-                    if($breakData){
-                        if($breakData && $breakData->breakout_time){//休憩開始と終了がペアで存在する場合（未退勤）
-                            return view('started', compact('user'));
-                        }else if($breakData->breakin_time && !$breakData->breakout_time){// 休憩中の場合（未退勤）
-                            return view('break', compact('user'));
-                        }
-                    }else{// 本日未休憩の場合
+            //最新出勤に関連する休憩データを取得
+            $breakData = Breaktime::where('attendance_id', $latestAttendance->id)->latest()->first();
+            // 最新出勤はあるが退勤データがない場合
+            if (!$latestAttendance->end_time) {
+                if($breakData){
+                    if($breakData->breakout_time){//休憩開始と終了がペアで存在する場合（未退勤）
                         return view('started', compact('user'));
+                    }else{// 休憩中の場合
+                        return view('break', compact('user'));
                     }
-                }else{   // 退勤済の場合
-                    return view('index', compact('user'));
+                }else{// 本日未休憩の場合
+                    return view('started', compact('user'));
                 }
-            }else{// 本日未出勤の場合
-                return view('index', compact('user'));
+            }else{   // 退勤済の場合
+                    return view('index', compact('user'));
             }
-        }else{ // 新規会員登録ページからのアクセス
+        }else{// 未出勤の場合
             return view('index', compact('user'));
         }
     }
 
+    // 出勤開始ボタンを押した後のページ(休憩開始、休憩終了ボタンが表示)
     public function started()
     {
         $user = auth()->user(); 
         return view('started', compact('user'));
     }
 
+    // 休憩開始ボタンを押した後のページ(休憩終了ボタンが表示)
     public function break()
     {
         $user = auth()->user(); 
@@ -70,10 +65,8 @@ class AttendanceController extends Controller
     {   
         $user = Auth::user();
         $now = Carbon::now();
-        $today = Carbon::today();
-        $month = intval($today->month);
-        $day = intval($today->day);
-        $year = intval($today->year);
+        $month = $now->month;
+        $day = $now->day;
         $latestAttendance = Attendance::where('user_id', $user->id)
         ->orderBy('created_at', 'desc')
         ->first();
@@ -83,23 +76,43 @@ class AttendanceController extends Controller
             'end_time' => null,
             'month' => $month,
             'day' => $day,
-            'year' => $year,
         ]);
         return view('started',compact('user'));
-  }
+    }
 
 
     // 退勤アクション
     public function punchOut()
     {
         $user = Auth::user();
+        $now = Carbon::now();
+        $month = $now->month;
+        $day = $now->day;
         $latestAttendance = Attendance::where('user_id',$user->id)
-        ->orderBy('created_at', 'desc')
+        ->orderBy('start_time', 'desc')
         ->first();
-        if ($latestAttendance && !$latestAttendance->end_time) {
-            $latestAttendance->update([
-                'end_time' => Carbon::now(),
-            ]);
+        if ($latestAttendance){
+            $latestAttendanceDay = Carbon::parse($latestAttendance->start_time);
+            $endOfDay = $latestAttendanceDay->copy()->addHours(24);
+            $startOfDay = $now->copy()->startOfDay();
+            // もし出勤当日中の退勤である場合は、通常の退勤操作を行う。
+            // もし出勤と退勤が別日であれば出勤日24時退勤、本日０時出勤開始としてから退勤操作を行う。
+            if($latestAttendanceDay->isSameDay($now)){
+                $latestAttendance->update([
+                    'end_time' => $now,
+                ]);
+            }else{
+                $latestAttendance->update([
+                    'end_time' => $endOfDay(),
+                ]);
+                $attendance = Attendance::create([
+                    'user_id' => $user->id,
+                    'start_time' => $startOfDay(),
+                    'end_time' => $now,
+                    'month' => $month,
+                    'day' => $day,
+                ]);
+            }
         }
         return view('index',compact('user'));
     }
@@ -126,17 +139,33 @@ class AttendanceController extends Controller
     {
         $user = auth()->user();
         $attendance = $user->attendance()->latest()->first();
-        $breaktime = Breaktime::where('attendance_id',$attendance->id)->latest()->first();
-   
+        $latestBreak = Breaktime::where('attendance_id', $attendance->id)
+        ->orderBy('created_at', 'desc')
+        ->first();
         $now = Carbon::now();
-        if ($breaktime) {
-            $breakIn =  new Carbon($breaktime->breakin_time);
+        if ($latestBreak) {
+            $breakIn =  Carbon::parse($latestBreak->breakin_time);
+            $endOfBreakDay = $breakIn->copy()->addHours(24);
+            $startOfDay = $now->copy()->startOfDay();
             $workBreak = $breakIn->diffInSeconds($now);
-            $breaktime->update([
-                'breakout_time' => $now,
-                'workbreak_seconds' => $workBreak
+            if($breakIn->isSameDay($now)){
+                $latestBreak->update([
+                    'breakout_time' => $now,
+                    'workbreak_seconds' => $breakIn->diffInSeconds($now),
+                    ]);
+            }else{
+                $latestBreak->update([
+                    'breakout_time' => $endOfBreakDay(),
+                    'workbreak_seconds' => $breakIn->diffInSeconds($endOfBreakDay),
                 ]);
+                $breaktimes = Breaktime::create([
+                    'attendance_id' => $attendance->id,
+                    'breakin_time' =>  $startOfDay,
+                    'breakout_time' => $now,
+                    'workbreak_seconds' => $startOfDay->diffInSeconds($now),
+                ]);                
             }
+        }
         return view('started',compact('user'));
     }
 
