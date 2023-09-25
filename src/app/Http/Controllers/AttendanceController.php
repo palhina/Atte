@@ -93,7 +93,6 @@ class AttendanceController extends Controller
         ->first();
         if ($latestAttendance){
             $latestAttendanceDay = Carbon::parse($latestAttendance->start_time);
-            $endOfDay = $latestAttendanceDay->copy()->addHours(24);
             $startOfDay = $now->copy()->startOfDay();
             // もし出勤当日中の退勤である場合は、通常の退勤操作を行う。
             // もし出勤と退勤が別日であれば出勤日24時退勤、本日０時出勤開始としてから退勤操作を行う。
@@ -103,11 +102,11 @@ class AttendanceController extends Controller
                 ]);
             }else{
                 $latestAttendance->update([
-                    'end_time' => $endOfDay(),
+                    'end_time' => $latestAttendanceDay->endOfDay(),
                 ]);
                 $attendance = Attendance::create([
                     'user_id' => $user->id,
-                    'start_time' => $startOfDay(),
+                    'start_time' => $startOfDay,
                     'end_time' => $now,
                     'month' => $month,
                     'day' => $day,
@@ -143,9 +142,11 @@ class AttendanceController extends Controller
         ->orderBy('created_at', 'desc')
         ->first();
         $now = Carbon::now();
+        $month = $now->month;
+        $day = $now->day;
         if ($latestBreak) {
             $breakIn =  Carbon::parse($latestBreak->breakin_time);
-            $endOfBreakDay = $breakIn->copy()->addHours(24);
+            $endOfBreakDay = $breakIn->copy()->endOfDay();
             $startOfDay = $now->copy()->startOfDay();
             $workBreak = $breakIn->diffInSeconds($now);
             if($breakIn->isSameDay($now)){
@@ -155,8 +156,20 @@ class AttendanceController extends Controller
                     ]);
             }else{
                 $latestBreak->update([
-                    'breakout_time' => $endOfBreakDay(),
+                    'breakout_time' => $endOfBreakDay,
                     'workbreak_seconds' => $breakIn->diffInSeconds($endOfBreakDay),
+                ]);
+                // 以下１６６行目まで追加項目
+                $latestAttendanceDay = Carbon::parse($attendance->start_time);
+                $attendance->update([
+                    'end_time' => $latestAttendanceDay->endOfDay(),
+                ]);
+                $attendance = Attendance::create([
+                    'user_id' => $user->id,
+                    'start_time' =>  $startOfDay,
+                    'end_time' => null,
+                    'month' => $month,
+                    'day' => $day,
                 ]);
                 $breaktimes = Breaktime::create([
                     'attendance_id' => $attendance->id,
