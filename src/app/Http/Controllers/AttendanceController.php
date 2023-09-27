@@ -94,12 +94,13 @@ class AttendanceController extends Controller
         if ($latestAttendance){
             $latestAttendanceDay = Carbon::parse($latestAttendance->start_time);
             $startOfDay = $now->copy()->startOfDay();
-            // もし出勤当日中の退勤である場合は、通常の退勤操作を行う。
-            // もし出勤と退勤が別日であれば出勤日24時退勤、本日０時出勤開始としてから退勤操作を行う。
+            // 出勤当日中の退勤である場合
+            
             if($latestAttendanceDay->isSameDay($now)){
                 $latestAttendance->update([
                     'end_time' => $now,
                 ]);
+            // 出勤と退勤が別日の場合
             }else{
                 $latestAttendance->update([
                     'end_time' => $latestAttendanceDay->endOfDay(),
@@ -119,17 +120,40 @@ class AttendanceController extends Controller
     // 休憩開始アクション
     public function breakIn()
     {
-        $user = Auth::user();
+        $user = auth()->user();
         $now = Carbon::now();
-        $today = Carbon::today();
-        $attendance = $user->attendance()->latest()->first();
+        $month = $now->month;
+        $day = $now->day;
+        $attendance = Attendance::where('user_id',$user->id)
+        ->orderBy('created_at', 'desc')
+        ->first();
         $latestBreak = Breaktime::where('attendance_id', $attendance->id)
         ->orderBy('created_at', 'desc')
         ->first();
-        $breaktimes = Breaktime::create([
-        'attendance_id' => $attendance->id,
-        'breakin_time' =>  $now,
-        ]);
+        $latestAttendanceDay = Carbon::parse($attendance->start_time);
+        $startOfDay = $now->copy()->startOfDay();
+        // 勤務開始日と休憩開始日が異なる場合、新たに本日の出勤データも作成。同日の場合は通常の休憩開始処理。
+        if($latestAttendanceDay->isSameDay($now)){
+            $breaktimes = Breaktime::create([
+                'attendance_id' => $attendance->id,
+                'breakin_time' =>  $now,
+            ]);
+        }else{
+            $attendance->update([
+                'end_time' => $latestAttendanceDay->endOfDay(),
+            ]);
+            $attendance = Attendance::create([
+                'user_id' => $user->id,
+                'start_time' =>  $startOfDay,
+                'end_time' => null,
+                'month' => $month,
+                'day' => $day,
+            ]);
+            $breaktimes = Breaktime::create([
+                'attendance_id' => $attendance->id,
+                'breakin_time' =>  $now,
+            ]);
+        }    
         return view('break', compact('user'));
     }
 
@@ -137,7 +161,9 @@ class AttendanceController extends Controller
     public function breakOut()
     {
         $user = auth()->user();
-        $attendance = $user->attendance()->latest()->first();
+        $attendance = Attendance::where('user_id',$user->id)
+        ->orderBy('created_at', 'desc')
+        ->first();
         $latestBreak = Breaktime::where('attendance_id', $attendance->id)
         ->orderBy('created_at', 'desc')
         ->first();
@@ -149,17 +175,18 @@ class AttendanceController extends Controller
             $endOfBreakDay = $breakIn->copy()->endOfDay();
             $startOfDay = $now->copy()->startOfDay();
             $workBreak = $breakIn->diffInSeconds($now);
+            // 当日中に休憩開始、終了する場合
             if($breakIn->isSameDay($now)){
                 $latestBreak->update([
                     'breakout_time' => $now,
                     'workbreak_seconds' => $breakIn->diffInSeconds($now),
                     ]);
+            // 休憩開始と休憩終了が同日でない場合
             }else{
                 $latestBreak->update([
                     'breakout_time' => $endOfBreakDay,
                     'workbreak_seconds' => $breakIn->diffInSeconds($endOfBreakDay),
                 ]);
-                // 以下１６６行目まで追加項目
                 $latestAttendanceDay = Carbon::parse($attendance->start_time);
                 $attendance->update([
                     'end_time' => $latestAttendanceDay->endOfDay(),
@@ -185,7 +212,7 @@ class AttendanceController extends Controller
     // 日付別勤怠管理ページ
         public function daily(Request $request)
     {   
-         // 日付による検索
+        // 日付による検索
         $selectedDate = $request->input('date', Carbon::now()->toDateString());
         $previousDate = Carbon::parse($selectedDate)->subDay()->toDateString();
         $nextDate = Carbon::parse($selectedDate)->addDay()->toDateString();

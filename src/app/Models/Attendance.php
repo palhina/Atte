@@ -24,15 +24,5 @@ class Attendance extends Model
     {
         return $this->hasMany(Breaktime::class);
     }
-
-     //任意の月の勤怠情報をDBから取得
-    public function scopeGetMonthAttendance($query,$month) {
-        return $query->where('month',$month);
-    }
-
-    //任意の日付の勤怠情報をDBから取得
-    public function scopeGetDayAttendance($query,$day) {
-        return $query->where('day',$day);
-    }
 }
 
