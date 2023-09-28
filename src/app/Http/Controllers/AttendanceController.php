@@ -17,7 +17,6 @@ class AttendanceController extends Controller
     public function index()
     {
         $user = auth::user(); 	
-        $today = Carbon::today();
         $latestAttendance = Attendance::where('user_id',$user->id)
         ->orderBy('created_at', 'desc')
         ->first();
@@ -65,8 +64,6 @@ class AttendanceController extends Controller
     {   
         $user = Auth::user();
         $now = Carbon::now();
-        $month = $now->month;
-        $day = $now->day;
         $latestAttendance = Attendance::where('user_id', $user->id)
         ->orderBy('created_at', 'desc')
         ->first();
@@ -74,8 +71,6 @@ class AttendanceController extends Controller
             'user_id' => $user->id,
             'start_time' =>  $now,
             'end_time' => null,
-            'month' => $month,
-            'day' => $day,
         ]);
         return view('started',compact('user'));
     }
@@ -86,8 +81,6 @@ class AttendanceController extends Controller
     {
         $user = Auth::user();
         $now = Carbon::now();
-        $month = $now->month;
-        $day = $now->day;
         $latestAttendance = Attendance::where('user_id',$user->id)
         ->orderBy('start_time', 'desc')
         ->first();
@@ -109,8 +102,6 @@ class AttendanceController extends Controller
                     'user_id' => $user->id,
                     'start_time' => $startOfDay,
                     'end_time' => $now,
-                    'month' => $month,
-                    'day' => $day,
                 ]);
             }
         }
@@ -122,8 +113,6 @@ class AttendanceController extends Controller
     {
         $user = auth()->user();
         $now = Carbon::now();
-        $month = $now->month;
-        $day = $now->day;
         $attendance = Attendance::where('user_id',$user->id)
         ->orderBy('created_at', 'desc')
         ->first();
@@ -146,8 +135,6 @@ class AttendanceController extends Controller
                 'user_id' => $user->id,
                 'start_time' =>  $startOfDay,
                 'end_time' => null,
-                'month' => $month,
-                'day' => $day,
             ]);
             $breaktimes = Breaktime::create([
                 'attendance_id' => $attendance->id,
@@ -168,8 +155,6 @@ class AttendanceController extends Controller
         ->orderBy('created_at', 'desc')
         ->first();
         $now = Carbon::now();
-        $month = $now->month;
-        $day = $now->day;
         if ($latestBreak) {
             $breakIn =  Carbon::parse($latestBreak->breakin_time);
             $endOfBreakDay = $breakIn->copy()->endOfDay();
@@ -195,8 +180,6 @@ class AttendanceController extends Controller
                     'user_id' => $user->id,
                     'start_time' =>  $startOfDay,
                     'end_time' => null,
-                    'month' => $month,
-                    'day' => $day,
                 ]);
                 $breaktimes = Breaktime::create([
                     'attendance_id' => $attendance->id,

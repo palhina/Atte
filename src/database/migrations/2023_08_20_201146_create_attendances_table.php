@@ -18,8 +18,6 @@ class CreateAttendancesTable extends Migration
             $table->integer('user_id');
             $table->timestamp('start_time');
             $table->timestamp('end_time')->nullable();
-            $table->integer('month');
-            $table->integer('day');
             $table->timestamps();
         });
     }
