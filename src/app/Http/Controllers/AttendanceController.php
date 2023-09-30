@@ -45,20 +45,6 @@ class AttendanceController extends Controller
         }
     }
 
-    // 出勤開始ボタンを押した後のページ(休憩開始、休憩終了ボタンが表示)
-    public function started()
-    {
-        $user = auth()->user(); 
-        return view('started', compact('user'));
-    }
-
-    // 休憩開始ボタンを押した後のページ(休憩終了ボタンが表示)
-    public function break()
-    {
-        $user = auth()->user(); 
-        return view('break', compact('user'));
-    }
-
     // 出勤アクション
     public function punchIn()
     {   

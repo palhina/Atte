@@ -15,11 +15,10 @@ use Laravel\Fortify\Fortify;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
+// 新規会員登録
 Route::get('/register', [RegisteredUserController::class,'create']);
 
 Route::middleware('verified')->group(function(){
-    Route::get('/home', [AttendanceController::class, 'home']);
     // 打刻ページ表示
     Route::get('/', [AttendanceController::class,'index']);
     // 打刻ページ（勤務開始後）表示
