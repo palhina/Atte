@@ -1,6 +1,9 @@
-# アプリケーション名  
-Atte（アット）
+# 勤怠管理アプリ Atte
 
+## アプリケーション名  
+Atte（アット）
+![index](https://github.com/palhina/Atte/assets/129643430/4f7e7487-c192-4b83-9f16-16ee06fa8dca)　　
+![日付別勤怠ページ](https://github.com/palhina/Atte/assets/129643430/97bc8f97-c180-4578-a522-4616d72de70f)　　
  
 ## 作成した目的  
 ある企業の人事評価のため、勤怠管理を行う
@@ -25,15 +28,15 @@ Docker version 24.0.5
 Laravel 8.83.27  
 Nginx 1.21.1  
 MySQL 8.0.26  
-PHP 8.1.2 
+PHP 8.1.2 　
 Composer 2.2.6  
 MailHog  
 
 ## テーブル設計  
-
+![テーブル仕様書](https://github.com/palhina/Atte/assets/129643430/297e64b5-775c-4605-8726-0472871ba388)
  
 ## ER図  
-
+![ER図](https://github.com/palhina/Atte/assets/129643430/c78d729d-438a-4e61-bae9-f13141f4f2e4)
  
 
 ## 環境構築  
