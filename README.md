@@ -1,18 +1,19 @@
 # 勤怠管理アプリ Atte
 
 ## アプリケーション名  
-Atte（アット）
+**Atte（アット）**
+* トップページ  
 ![index](https://github.com/palhina/Atte/assets/129643430/4f7e7487-c192-4b83-9f16-16ee06fa8dca)　　
+* 日付別勤怠ページ
 ![日付別勤怠ページ](https://github.com/palhina/Atte/assets/129643430/97bc8f97-c180-4578-a522-4616d72de70f)　　
- 
 ## 作成した目的  
-ある企業の人事評価のため、勤怠管理を行う
+ある企業の人事評価のため、勤怠管理を行う  
 
 ## アプリケーションURL  
-GithubURL：https://github.com/palhina/Atte.git
+GithubURL：https://github.com/palhina/Atte.git  
 
 ## ほかのレポジトリ  
-今回はなし
+今回はなし  
 
 ## 機能一覧  
 新規会員登録  
@@ -21,7 +22,7 @@ GithubURL：https://github.com/palhina/Atte.git
 打刻（出勤開始・終了、休憩開始・終了）  
 日付毎の(ユーザー全員の)勤怠履歴表示  
 ユーザー一覧表示  
-ユーザー毎の勤怠履歴表示  
+ユーザー毎の勤怠履歴表示    
 
 ## 使用技術(実行環境)  
 Docker version 24.0.5  
@@ -33,10 +34,10 @@ Composer 2.2.6
 MailHog  
 
 ## テーブル設計  
-![テーブル仕様書](https://github.com/palhina/Atte/assets/129643430/297e64b5-775c-4605-8726-0472871ba388)
+![テーブル仕様書](https://github.com/palhina/Atte/assets/129643430/297e64b5-775c-4605-8726-0472871ba388)  
  
 ## ER図  
-![ER図](https://github.com/palhina/Atte/assets/129643430/c78d729d-438a-4e61-bae9-f13141f4f2e4)
+![ER図](https://github.com/palhina/Atte/assets/129643430/c78d729d-438a-4e61-bae9-f13141f4f2e4)  
  
 
 ## 環境構築  
