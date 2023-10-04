@@ -80,7 +80,7 @@ Docker version 24.0.5
 Laravel 8.83.27  
 認証機能はFortify使用  
 Nginx 1.21.1  
-MySQL 8.0.26  
+MySQL 8.0.32  
 PHP 8.1.2  
 Composer 2.2.6  
 MailHog  
