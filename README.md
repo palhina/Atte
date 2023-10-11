@@ -62,6 +62,7 @@ Fortifyを使用しています。
 
 ## アプリケーションURL  
 GithubURL：https://github.com/palhina/Atte.git  
+http://atte-aws-app.xyz (別途設定が必要です：追記部分に後述)  
 
 ## ほかのレポジトリ  
 今回はなし  
@@ -161,3 +162,4 @@ MailHog
   ユーザー名：study（権限：administration）アカウントID：973518952750、パスワード：dYfX58MBでログインしてください  
 2. EC2インスタンス(atte-aws-app)とRDSインスタンス(atte-aws-app-db)を開始してください  
 3. それぞれが正常に起動したことを確認し、EC2インスタンスのパブリックIPv4アドレス、あるいはパブリックIPv4DNSをブラウザに入力してください。  
+4. URL (http://atte-aws-app.xyz) からアクセスする場合は、ElasticIPアドレスを発行しEC2インスタンスに紐づけた後、Route53のレコード名：atte-aws-app.xyzレコードタイプ：Aの値をElasticIPの値に変更してください。
