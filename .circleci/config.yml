@@ -8,6 +8,7 @@ jobs:
     # Install php packages and run tests
     docker:
       - image: cimg/php:7.3-node
+    working_directory: /atte/.circleci
     steps:
       - checkout:
           path: ~/project
@@ -15,8 +16,9 @@ jobs:
       - run:
           name: Setup project
           command: |
-            cd ~/project
-            cp -R atte/src/* .
+            cd ../
+            cd src
+            composer install
       - run:
           name: run tests
           command: ./vendor/bin/phpunit
