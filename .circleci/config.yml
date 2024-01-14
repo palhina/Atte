@@ -13,6 +13,11 @@ jobs:
           path: ~/project
       - php/install-packages
       - run:
+          name: Setup project
+          command: |
+            cd ~/project
+            cp -R atte/src/* .
+      - run:
           name: run tests
           command: ./vendor/bin/phpunit
   deploy:
@@ -23,7 +28,7 @@ jobs:
       # Replace this with steps to deploy to users
       - run:
           name: deploy
-          command: '#e.g. ./deploy.sh'
+          command: "#e.g. ./deploy.sh"
 workflows:
   build-and-test:
     jobs:
